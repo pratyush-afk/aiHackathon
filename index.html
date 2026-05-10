@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AURA — AI Unified Resolution Assistant</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body>
+  <!-- ==================== SPLASH SCREEN ==================== -->
+  <div id="splash" class="splash">
+    <div class="splash-content">
+      <div class="splash-logo-ring">
+        <svg class="splash-ring" viewBox="0 0 120 120">
+          <circle cx="60" cy="60" r="54" />
+        </svg>
+        <div class="splash-icon"><i class="ri-sparkling-2-fill"></i></div>
+      </div>
+      <h1 class="splash-title">AURA</h1>
+      <p class="splash-sub">AI Unified Resolution Assistant</p>
+      <div class="splash-loader"><div class="splash-bar"></div></div>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN APP ==================== -->
+  <div id="app" class="app hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-icon"><i class="ri-sparkling-2-fill"></i></div>
+          <span class="logo-text">AURA</span>
+        </div>
+        <button class="btn-icon sidebar-toggle" onclick="toggleSidebar()"><i class="ri-menu-fold-line"></i></button>
+      </div>
+
+      <button class="btn-new-chat" onclick="newChat()">
+        <i class="ri-add-line"></i> <span>New Session</span>
+      </button>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">NAVIGATE</div>
+        <button class="nav-item active" data-view="chat" onclick="switchView('chat', this)">
+          <i class="ri-message-3-line"></i><span>Chat</span>
+        </button>
+        <button class="nav-item" data-view="dashboard" onclick="switchView('dashboard', this)">
+          <i class="ri-dashboard-line"></i><span>Dashboard</span>
+        </button>
+        <button class="nav-item" data-view="kb" onclick="switchView('kb', this)">
+          <i class="ri-book-open-line"></i><span>Knowledge Base</span>
+        </button>
+        <button class="nav-item" data-view="history" onclick="switchView('history', this)">
+          <i class="ri-history-line"></i><span>History</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-nav" style="margin-top:auto;">
+        <div class="nav-section-title collapsible-header" onclick="toggleSection('recentSessions', this)">
+          <span>RECENT SESSIONS</span>
+          <i class="ri-arrow-up-s-line section-arrow"></i>
+        </div>
+        <div id="recentSessions" class="recent-sessions collapsible-body"></div>
+      </div>
+
+      <div class="sidebar-nav online-engineers-section">
+        <div class="nav-section-title collapsible-header" onclick="toggleSection('onlineList', this)">
+          <span>ONLINE ENGINEERS</span>
+          <i class="ri-arrow-up-s-line section-arrow"></i>
+        </div>
+        <div class="online-list collapsible-body" id="onlineList">
+          <div class="online-item">
+            <div class="online-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">RK</div>
+            <div class="online-info"><span class="online-name">Rahul Kumar</span><span class="online-role">Tier-3 • SRE Lead</span></div>
+            <div class="online-dot"></div>
+          </div>
+          <div class="online-item">
+            <div class="online-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">PS</div>
+            <div class="online-info"><span class="online-name">Priya Sharma</span><span class="online-role">Tier-2 • SJPM Expert</span></div>
+            <div class="online-dot"></div>
+          </div>
+          <div class="online-item">
+            <div class="online-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)">AM</div>
+            <div class="online-info"><span class="online-name">Amit Mehta</span><span class="online-role">Tier-3 • DBA</span></div>
+            <div class="online-dot"></div>
+          </div>
+          <div class="online-item">
+            <div class="online-avatar" style="background:linear-gradient(135deg,#3b82f6,#2563eb)">SG</div>
+            <div class="online-info"><span class="online-name">Sneha Gupta</span><span class="online-role">Tier-2 • SJPM & Host</span></div>
+            <div class="online-dot"></div>
+          </div>
+          <div class="online-item offline">
+            <div class="online-avatar" style="background:var(--bg-tertiary)">VR</div>
+            <div class="online-info"><span class="online-name">Vikram Rao</span><span class="online-role">Tier-3 • Platform</span></div>
+            <div class="online-dot off"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="avatar">SE</div>
+          <div class="user-info">
+            <span class="user-name">Support Engineer</span>
+            <span class="user-role">Tier-2 • Online</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main" id="main">
+
+      <!-- ====== CHAT VIEW ====== -->
+      <div class="view active" id="view-chat">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+          <button class="btn-icon sidebar-open" onclick="toggleSidebar()"><i class="ri-menu-unfold-line"></i></button>
+          <div class="topbar-center">
+            <div class="status-dot pulse"></div>
+            <span>AURA Agent — Ready</span>
+            <div class="session-timer" id="sessionTimer"><i class="ri-time-line"></i><span id="timerDisplay">00:00</span></div>
+          </div>
+          <div class="topbar-actions">
+            <button class="btn-icon" title="Search (Ctrl+K)" onclick="showCommandPalette()"><i class="ri-search-line"></i></button>
+            <button class="btn-icon" title="Analyze Logs" onclick="showLogAnalyzer()"><i class="ri-terminal-box-line"></i></button>
+            <button class="btn-icon" title="Export Chat" onclick="exportChat()"><i class="ri-download-2-line"></i></button>
+            <button class="btn-icon" title="Escalation Matrix" onclick="showEscalation()"><i class="ri-alarm-warning-line"></i></button>
+            <button class="btn-icon" title="Settings" onclick="showSettings()"><i class="ri-settings-3-line"></i></button>
+          </div>
+        </header>
+
+        <!-- Chat Area -->
+        <div class="chat-area" id="chatArea">
+          <!-- Welcome -->
+          <div class="welcome-container" id="welcome">
+            <div class="welcome-glow"></div>
+            <div class="welcome-icon"><i class="ri-sparkling-2-fill"></i></div>
+            <h2>Hello, Engineer!</h2>
+            <p>I'm <strong>AURA</strong> — your AI resolution assistant. Describe your issue or pick a quick action below.</p>
+            <div class="quick-actions">
+              <button class="quick-btn" onclick="sendQuickQuery('SJPM shows Host Status as Down for configured devices. How to fix?')">
+                <i class="ri-wifi-off-line"></i>
+                <span>SJPM Host Down</span>
+              </button>
+              <button class="quick-btn" onclick="sendQuickQuery('SJPM shows The Server is unavailable and the icon is yellow. How do I fix this?')">
+                <i class="ri-alert-line"></i>
+                <span>SJPM Unavailable</span>
+              </button>
+              <button class="quick-btn" onclick="sendQuickQuery('How to install Sabre Java Printing Module (SJPM)?')">
+                <i class="ri-printer-line"></i>
+                <span>Install SJPM</span>
+              </button>
+              <button class="quick-btn" onclick="sendQuickQuery('How do I set up monitoring alerts for production services?')">
+                <i class="ri-notification-3-line"></i>
+                <span>Setup Alerts</span>
+              </button>
+              <button class="quick-btn" onclick="startGuidedFlow()">
+                <i class="ri-route-line"></i>
+                <span>Guided Diagnosis</span>
+              </button>
+              <button class="quick-btn" onclick="showEscalation()">
+                <i class="ri-alarm-warning-line"></i>
+                <span>Escalation Guide</span>
+              </button>
+              <button class="quick-btn" onclick="switchView('kb', document.querySelector('[data-view=kb]'))">
+                <i class="ri-book-open-line"></i>
+                <span>Browse KB</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages Container -->
+          <div id="messages"></div>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="input-bar">
+          <div class="input-wrapper">
+            <button class="btn-icon attach-btn" title="Attach logs"><i class="ri-attachment-2"></i></button>
+            <textarea id="userInput" placeholder="Describe the issue or ask a question..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+            <button class="btn-voice" id="voiceBtn" title="Voice input" onclick="toggleVoice()"><i class="ri-mic-line"></i></button>
+            <button class="btn-send" id="sendBtn" onclick="sendMessage()">
+              <i class="ri-send-plane-fill"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ====== DASHBOARD VIEW ====== -->
+      <div class="view" id="view-dashboard">
+        <header class="topbar">
+          <button class="btn-icon sidebar-open" onclick="toggleSidebar()"><i class="ri-menu-unfold-line"></i></button>
+          <div class="topbar-center"><span>Performance Dashboard</span></div>
+          <div class="topbar-actions"></div>
+        </header>
+        <div class="dashboard-content">
+          <div class="dash-header">
+            <h2><i class="ri-dashboard-line"></i> AURA Metrics Dashboard</h2>
+            <p>Real-time overview of resolution performance and agent efficiency</p>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-card gradient-1">
+              <div class="metric-icon"><i class="ri-timer-flash-line"></i></div>
+              <div class="metric-value" data-count="87">0%</div>
+              <div class="metric-label">Resolution Time Reduction</div>
+              <div class="metric-sub">Avg 2.3 min vs 18 min baseline</div>
+            </div>
+            <div class="metric-card gradient-2">
+              <div class="metric-icon"><i class="ri-checkbox-circle-line"></i></div>
+              <div class="metric-value" data-count="94">0%</div>
+              <div class="metric-label">First-Call Resolution Rate</div>
+              <div class="metric-sub">Up from 62% baseline</div>
+            </div>
+            <div class="metric-card gradient-3">
+              <div class="metric-icon"><i class="ri-arrow-down-circle-line"></i></div>
+              <div class="metric-value" data-count="71">0%</div>
+              <div class="metric-label">Escalation Reduction</div>
+              <div class="metric-sub">Fewer tickets to Tier-3</div>
+            </div>
+            <div class="metric-card gradient-4">
+              <div class="metric-icon"><i class="ri-team-line"></i></div>
+              <div class="metric-value" data-count="156">0</div>
+              <div class="metric-label">Engineers Empowered</div>
+              <div class="metric-sub">Across 12 support teams</div>
+            </div>
+          </div>
+          <div class="charts-row">
+            <div class="chart-card">
+              <h3><i class="ri-bar-chart-grouped-line"></i> Resolution Time — Before vs After</h3>
+              <div class="bar-chart" id="barChart"></div>
+            </div>
+            <div class="chart-card">
+              <h3><i class="ri-pie-chart-line"></i> Ticket Categories</h3>
+              <div class="donut-chart-container">
+                <div class="donut-chart" id="donutChart">
+                  <svg viewBox="0 0 160 160"><circle cx="80" cy="80" r="60" class="donut-ring"/><circle cx="80" cy="80" r="60" class="donut-seg seg1" stroke-dasharray="94.2 282.6" stroke-dashoffset="0"/><circle cx="80" cy="80" r="60" class="donut-seg seg2" stroke-dasharray="75.4 282.6" stroke-dashoffset="-94.2"/><circle cx="80" cy="80" r="60" class="donut-seg seg3" stroke-dasharray="56.5 282.6" stroke-dashoffset="-169.6"/><circle cx="80" cy="80" r="60" class="donut-seg seg4" stroke-dasharray="56.5 282.6" stroke-dashoffset="-226.1"/></svg>
+                </div>
+                <div class="donut-legend">
+                  <div class="legend-item"><span class="legend-dot" style="background:#6366f1"></span>SJPM Host — 33%</div>
+                  <div class="legend-item"><span class="legend-dot" style="background:#8b5cf6"></span>SJPM — 27%</div>
+                  <div class="legend-item"><span class="legend-dot" style="background:#a78bfa"></span>Database — 20%</div>
+                  <div class="legend-item"><span class="legend-dot" style="background:#c4b5fd"></span>Other — 20%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="timeline-card">
+            <h3><i class="ri-git-merge-line"></i> Recent Resolutions</h3>
+            <div class="timeline">
+              <div class="timeline-item"><div class="tl-dot resolved"></div><div class="tl-content"><strong>INC-40921</strong> — SJPM Host Status Down on agent workstation <span class="tl-tag resolved">Resolved in 1.8 min</span></div></div>
+              <div class="timeline-item"><div class="tl-dot resolved"></div><div class="tl-content"><strong>INC-40918</strong> — SJPM Server Unavailable on agent workstation <span class="tl-tag resolved">Resolved in 2.1 min</span></div></div>
+              <div class="timeline-item"><div class="tl-dot escalated"></div><div class="tl-content"><strong>INC-40915</strong> — DB replication lag exceeds threshold <span class="tl-tag escalated">Escalated to DBA</span></div></div>
+              <div class="timeline-item"><div class="tl-dot resolved"></div><div class="tl-content"><strong>INC-40912</strong> — SSL certificate renewal failure <span class="tl-tag resolved">Resolved in 0.9 min</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== KB VIEW ====== -->
+      <div class="view" id="view-kb">
+        <header class="topbar">
+          <button class="btn-icon sidebar-open" onclick="toggleSidebar()"><i class="ri-menu-unfold-line"></i></button>
+          <div class="topbar-center"><span>Knowledge Base</span></div>
+          <div class="topbar-actions"></div>
+        </header>
+        <div class="kb-content">
+          <div class="kb-header">
+            <h2><i class="ri-book-open-line"></i> Knowledge Base</h2>
+            <div class="kb-search">
+              <i class="ri-search-line"></i>
+              <input type="text" placeholder="Search articles, SOPs, runbooks..." id="kbSearch" oninput="filterKB(this.value)" />
+            </div>
+          </div>
+          <div class="kb-grid" id="kbGrid">
+            <div class="kb-card" data-tags="sjpm host down lniata hssp sabre host connectivity">
+              <div class="kb-card-icon" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)"><i class="ri-wifi-off-line"></i></div>
+              <h4>SJPM — Host Status Down</h4>
+              <p>Troubleshooting guide for SJPM Host Status Down including LNIATA validation, connectivity, and S02 errors.</p>
+              <div class="kb-tags"><span>SJPM</span><span>Host Down</span><span>LNIATA</span></div>
+            </div>
+            <div class="kb-card" data-tags="sjpm server unavailable yellow printing service">
+              <div class="kb-card-icon" style="background:linear-gradient(135deg,#8b5cf6,#a78bfa)"><i class="ri-alert-line"></i></div>
+              <h4>SJPM — Server Unavailable Fix</h4>
+              <p>Troubleshooting guide when SJPM shows "The Server is unavailable" with yellow tray icon.</p>
+              <div class="kb-tags"><span>SJPM</span><span>Service</span><span>Unavailable</span></div>
+            </div>
+            <div class="kb-card" data-tags="sjpm sabre java printing module install printer">
+              <div class="kb-card-icon" style="background:linear-gradient(135deg,#a78bfa,#c4b5fd)"><i class="ri-printer-line"></i></div>
+              <h4>SJPM Installation Guide</h4>
+              <p>Step-by-step guide for downloading and installing Sabre Java Printing Module (SJPM) with prerequisites.</p>
+              <div class="kb-tags"><span>SJPM</span><span>Printing</span><span>Install</span></div>
+            </div>
+            <div class="kb-card" data-tags="monitoring alerts prometheus grafana">
+              <div class="kb-card-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)"><i class="ri-notification-3-line"></i></div>
+              <h4>Production Monitoring Setup</h4>
+              <p>Guide to configuring alerting rules, dashboards, and on-call notifications for production.</p>
+              <div class="kb-tags"><span>Monitoring</span><span>Alerts</span><span>Grafana</span></div>
+            </div>
+            <div class="kb-card" data-tags="ssl tls certificate renewal expiry">
+              <div class="kb-card-icon" style="background:linear-gradient(135deg,#10b981,#059669)"><i class="ri-lock-line"></i></div>
+              <h4>SSL/TLS Certificate Renewal</h4>
+              <p>Procedures for SSL certificate renewal, auto-renewal setup, and troubleshooting failures.</p>
+              <div class="kb-tags"><span>SSL</span><span>TLS</span><span>Certs</span></div>
+            </div>
+            <div class="kb-card" data-tags="ci cd pipeline jenkins github actions deploy">
+              <div class="kb-card-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="ri-git-branch-line"></i></div>
+              <h4>CI/CD Pipeline Failures</h4>
+              <p>Common CI/CD pipeline failure scenarios and resolution steps for Jenkins & GitHub Actions.</p>
+              <div class="kb-tags"><span>CI/CD</span><span>Pipeline</span><span>Deploy</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== HISTORY VIEW ====== -->
+      <div class="view" id="view-history">
+        <header class="topbar">
+          <button class="btn-icon sidebar-open" onclick="toggleSidebar()"><i class="ri-menu-unfold-line"></i></button>
+          <div class="topbar-center"><span>Session History</span></div>
+          <div class="topbar-actions"></div>
+        </header>
+        <div class="history-content">
+          <div class="dash-header">
+            <h2><i class="ri-history-line"></i> Resolution History</h2>
+            <p>Past troubleshooting sessions and their outcomes</p>
+          </div>
+          <div class="history-list">
+            <div class="history-item">
+              <div class="hist-icon resolved"><i class="ri-checkbox-circle-fill"></i></div>
+              <div class="hist-body">
+                <h4>SJPM Host Status Down — Travel Agency Terminal</h4>
+                <p>Root cause: Duplicate LNIATA on another workstation (S02 error). Resolved via ZUDWS CLEAR ALL.</p>
+                <div class="hist-meta"><span><i class="ri-time-line"></i> 1.8 min</span><span><i class="ri-calendar-line"></i> May 8, 2026</span><span class="hist-tag resolved">Resolved</span></div>
+              </div>
+            </div>
+            <div class="history-item">
+              <div class="hist-icon resolved"><i class="ri-checkbox-circle-fill"></i></div>
+              <div class="hist-body">
+                <h4>SJPM Server Unavailable — Booking Terminal</h4>
+                <p>Root cause: Corrupted JSON config file in instances folder. Resolved by renaming and recreating device.</p>
+                <div class="hist-meta"><span><i class="ri-time-line"></i> 2.1 min</span><span><i class="ri-calendar-line"></i> May 8, 2026</span><span class="hist-tag resolved">Resolved</span></div>
+              </div>
+            </div>
+            <div class="history-item">
+              <div class="hist-icon escalated"><i class="ri-arrow-up-circle-fill"></i></div>
+              <div class="hist-body">
+                <h4>DB Replication Lag — Analytics Cluster</h4>
+                <p>Replication lag exceeded 30s. Escalated to DBA team for replica rebuild.</p>
+                <div class="hist-meta"><span><i class="ri-time-line"></i> 4.5 min</span><span><i class="ri-calendar-line"></i> May 7, 2026</span><span class="hist-tag escalated">Escalated</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ====== ESCALATION MODAL ====== -->
+  <div class="modal-overlay" id="escalationModal" onclick="closeModal(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <h3><i class="ri-alarm-warning-line"></i> Escalation Matrix</h3>
+        <button class="btn-icon" onclick="hideEscalation()"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="esc-card">
+          <div class="esc-severity sev-critical">P1 — Critical</div>
+          <p><strong>Impact:</strong> Production outage, revenue-impacting</p>
+          <p><strong>Response:</strong> Immediate — within 15 minutes</p>
+          <p><strong>Escalate to:</strong> On-call SRE Lead + Engineering Manager</p>
+          <p><strong>Channel:</strong> #incident-response (Slack) + PagerDuty</p>
+        </div>
+        <div class="esc-card">
+          <div class="esc-severity sev-high">P2 — High</div>
+          <p><strong>Impact:</strong> Degraded service, significant user impact</p>
+          <p><strong>Response:</strong> Within 30 minutes</p>
+          <p><strong>Escalate to:</strong> Team Lead + Service Owner</p>
+          <p><strong>Channel:</strong> #support-escalations (Slack)</p>
+        </div>
+        <div class="esc-card">
+          <div class="esc-severity sev-medium">P3 — Medium</div>
+          <p><strong>Impact:</strong> Minor service issue, workaround available</p>
+          <p><strong>Response:</strong> Within 2 hours</p>
+          <p><strong>Escalate to:</strong> Senior Engineer on rotation</p>
+          <p><strong>Channel:</strong> JIRA ticket + Team channel</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== SETTINGS MODAL ====== -->
+  <div class="modal-overlay" id="settingsModal" onclick="closeModal(event)">
+    <div class="modal" style="max-width:520px">
+      <div class="modal-header">
+        <h3><i class="ri-settings-3-line"></i> Settings</h3>
+        <button class="btn-icon" onclick="hideSettings()"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-group">
+          <div class="settings-label">Appearance</div>
+          <div class="setting-row">
+            <div class="setting-info"><span class="setting-title">Theme</span><span class="setting-desc">Switch between dark and light mode</span></div>
+            <select class="setting-select" id="themeSelect" onchange="changeTheme(this.value)">
+              <option value="dark" selected>Dark</option>
+              <option value="light">Light</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><span class="setting-title">Font Size</span><span class="setting-desc">Adjust chat text size</span></div>
+            <select class="setting-select" id="fontSelect" onchange="changeFontSize(this.value)">
+              <option value="13">Small</option>
+              <option value="14" selected>Default</option>
+              <option value="16">Large</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><span class="setting-title">Accent Color</span><span class="setting-desc">Choose agent accent color</span></div>
+            <div class="color-options">
+              <button class="color-dot active" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)" onclick="changeAccent('#6366f1','#8b5cf6',this)"></button>
+              <button class="color-dot" style="background:linear-gradient(135deg,#3b82f6,#2563eb)" onclick="changeAccent('#3b82f6','#2563eb',this)"></button>
+              <button class="color-dot" style="background:linear-gradient(135deg,#10b981,#059669)" onclick="changeAccent('#10b981','#059669',this)"></button>
+              <button class="color-dot" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="changeAccent('#f59e0b','#d97706',this)"></button>
+              <button class="color-dot" style="background:linear-gradient(135deg,#ef4444,#dc2626)" onclick="changeAccent('#ef4444','#dc2626',this)"></button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-label">Notifications</div>
+          <div class="setting-row">
+            <div class="setting-info"><span class="setting-title">Sound Effects</span><span class="setting-desc">Play sound on new responses</span></div>
+            <label class="toggle"><input type="checkbox" id="soundToggle" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><span class="setting-title">Desktop Notifications</span><span class="setting-desc">Show browser notifications for escalations</span></div>
+            <label class="toggle"><input type="checkbox" id="notifToggle" /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-label">Chat</div>
+          <div class="setting-row">
+            <div class="setting-info"><span class="setting-title">Auto-scroll</span><span class="setting-desc">Automatically scroll to latest message</span></div>
+            <label class="toggle"><input type="checkbox" id="scrollToggle" checked /><span class="toggle-slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info"><span class="setting-title">Typing Animation</span><span class="setting-desc">Show typing indicator before responses</span></div>
+            <label class="toggle"><input type="checkbox" id="typingToggle" checked /><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="settings-group">
+          <div class="settings-label">Data</div>
+          <div class="setting-row">
+            <div class="setting-info"><span class="setting-title">Clear Chat History</span><span class="setting-desc">Remove all messages and sessions</span></div>
+            <button class="setting-btn danger" onclick="clearAllData()"><i class="ri-delete-bin-line"></i> Clear</button>
+          </div>
+        </div>
+        <div class="settings-version">AURA v1.0.0 &middot; Built for Ignite Hackathon 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== COMMAND PALETTE ====== -->
+  <div class="command-palette-overlay" id="commandPalette" onclick="closeCommandPalette(event)">
+    <div class="command-palette">
+      <div class="cmd-input-wrap">
+        <i class="ri-search-line"></i>
+        <input type="text" id="cmdInput" placeholder="Search KB, actions, commands..." oninput="filterCommands(this.value)" onkeydown="handleCmdKey(event)" />
+        <kbd>ESC</kbd>
+      </div>
+      <div class="cmd-results" id="cmdResults">
+        <div class="cmd-section-title">Quick Actions</div>
+        <button class="cmd-item" onclick="cmdAction('newchat')"><i class="ri-add-line"></i><span>New Chat Session</span><kbd>Ctrl+N</kbd></button>
+        <button class="cmd-item" onclick="cmdAction('export')"><i class="ri-download-2-line"></i><span>Export Chat Transcript</span><kbd>Ctrl+E</kbd></button>
+        <button class="cmd-item" onclick="cmdAction('logs')"><i class="ri-terminal-box-line"></i><span>Open Log Analyzer</span></button>
+        <button class="cmd-item" onclick="cmdAction('escalation')"><i class="ri-alarm-warning-line"></i><span>Escalation Matrix</span></button>
+        <button class="cmd-item" onclick="cmdAction('dashboard')"><i class="ri-dashboard-line"></i><span>View Dashboard</span></button>
+        <div class="cmd-section-title">Knowledge Base</div>
+        <button class="cmd-item" onclick="cmdAction('q-host-down')"><i class="ri-wifi-off-line"></i><span>SJPM Host Status Down Fix</span><span class="cmd-tag">KB-5020</span></button>
+        <button class="cmd-item" onclick="cmdAction('q-sjpm-unavail')"><i class="ri-alert-line"></i><span>SJPM Server Unavailable Fix</span><span class="cmd-tag">KB-5010</span></button>
+        <button class="cmd-item" onclick="cmdAction('q-sjpm')"><i class="ri-printer-line"></i><span>SJPM Installation Guide</span><span class="cmd-tag">KB-5001</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== LOG ANALYZER MODAL ====== -->
+  <div class="modal-overlay" id="logAnalyzerModal" onclick="closeModal(event)">
+    <div class="modal" style="max-width:700px">
+      <div class="modal-header">
+        <h3><i class="ri-terminal-box-line"></i> Log Analyzer</h3>
+        <button class="btn-icon" onclick="hideLogAnalyzer()"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text-secondary);margin-bottom:12px;font-size:0.85rem">Paste your error logs below. AURA will scan for known error patterns and suggest resolutions.</p>
+        <textarea id="logInput" class="log-textarea" rows="10" placeholder="Paste your logs here...
+Example:
+2026-05-09 14:32:01 ERROR [upstream] connect() failed (111: Connection refused) while connecting to upstream
+2026-05-09 14:32:01 ERROR [pool] HikariPool-1 - Connection is not available, request timed out after 30000ms"></textarea>
+        <button class="btn-analyze" onclick="analyzeLogs()"><i class="ri-scan-line"></i> Analyze Logs</button>
+        <div id="logResults"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TICKET MODAL ====== -->
+  <div class="modal-overlay" id="ticketModal" onclick="closeModal(event)">
+    <div class="modal" style="max-width:580px">
+      <div class="modal-header">
+        <h3><i class="ri-ticket-line"></i> Generate Incident Ticket</h3>
+        <button class="btn-icon" onclick="hideTicketModal()"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="modal-body">
+        <div id="ticketContent"></div>
+        <div class="ticket-actions">
+          <button class="btn-analyze" onclick="copyTicket()"><i class="ri-file-copy-line"></i> Copy to Clipboard</button>
+          <button class="btn-analyze secondary" onclick="hideTicketModal()"><i class="ri-close-line"></i> Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== TOAST ====== -->
+  <div id="toast" class="toast"></div>
+
+  <div class="shortcut-hint"><kbd>Ctrl</kbd>+<kbd>K</kbd> to search &nbsp;·&nbsp; <kbd>Ctrl</kbd>+<kbd>N</kbd> new chat &nbsp;·&nbsp; <kbd>Ctrl</kbd>+<kbd>E</kbd> export</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
